@@ -1,7 +1,16 @@
 import axios from 'axios';
 
+// Vite replaces VITE_* values at build time. Keep the Render backend as a
+// production fallback so a missing Static Site environment variable does not
+// silently send API requests back to the frontend host.
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD
+    ? 'https://digital-platform-for-efficient-remote.onrender.com/api'
+    : '/api');
+
 const client = axios.create({
-  baseURL: '/api',
+  // VITE_API_URL should include the /api suffix.
+  baseURL: API_BASE_URL,
   timeout: 10000
 });
 

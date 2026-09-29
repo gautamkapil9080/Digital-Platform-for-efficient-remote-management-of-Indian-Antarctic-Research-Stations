@@ -7,7 +7,7 @@ import ChartCard from '../components/ChartCard';
 import StatusBadge from '../components/StatusBadge';
 
 export default function Dashboard() {
-  const { selectedSummary, selectedStationId } = useStations();
+  const { selectedSummary, selectedStationId, loading, error, refresh } = useStations();
   const [energyHistory, setEnergyHistory] = useState([]);
   const [envHistory, setEnvHistory] = useState([]);
 
@@ -47,7 +47,18 @@ export default function Dashboard() {
     };
   }, [selectedStationId]);
 
-  if (!selectedSummary) return <div className="page-loading">Loading station telemetry...</div>;
+  if (!selectedSummary) {
+    if (loading) return <div className="page-loading">Loading station telemetry...</div>;
+    return (
+      <div className="page">
+        <div className="panel">
+          <h2>Station data unavailable</h2>
+          <p>{error || 'No stations were returned by the backend.'}</p>
+          <button className="btn-primary" type="button" onClick={refresh}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   const { station, latestEnergy, latestEnv, openAlerts, criticalInfra, lowStock } = selectedSummary;
 

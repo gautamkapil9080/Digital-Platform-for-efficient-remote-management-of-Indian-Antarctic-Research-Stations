@@ -12,19 +12,28 @@ export function StationProvider({ children }) {
     localStorage.getItem('selectedStationId') || null
   );
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   async function refresh() {
-    const res = await client.get('/stations');
-    setStations(res.data);
-    setLoading(false);
-    const hasSelectedStation = res.data.some((summary) => summary.station._id === selectedStationId);
-    if (res.data.length && !hasSelectedStation) {
-      const first = res.data[0].station._id;
-      setSelectedStationId(first);
-      localStorage.setItem('selectedStationId', first);
-    } else if (!res.data.length) {
-      setSelectedStationId(null);
-      localStorage.removeItem('selectedStationId');
+    try {
+      const res = await client.get('/stations');
+      setStations(res.data);
+      setError('');
+      const hasSelectedStation = res.data.some((summary) => summary.station._id === selectedStationId);
+      if (res.data.length && !hasSelectedStation) {
+        const first = res.data[0].station._id;
+        setSelectedStationId(first);
+        localStorage.setItem('selectedStationId', first);
+      } else if (!res.data.length) {
+        setSelectedStationId(null);
+        localStorage.removeItem('selectedStationId');
+      }
+    } catch (err) {
+      // A failed request must end the loading state and give the operator a
+      // useful recovery path instead of leaving the dashboard on a spinner.
+      setError(err.response?.data?.error || 'Unable to reach station data. Check the backend CORS settings and connection.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -33,9 +42,11 @@ export function StationProvider({ children }) {
     // screen, where the resulting 401 would otherwise force a page reload.
     if (!user) {
       setStations([]);
+      setError('');
       setLoading(false);
       return;
     }
+    setLoading(true);
     refresh();
     // the summary (open-alert counts etc.) still refreshes on a slow poll;
     // the detailed charts/tables get pushed live via socket events instead.
@@ -76,7 +87,7 @@ export function StationProvider({ children }) {
   const selectedSummary = stations.find((s) => s.station._id === selectedStationId) || null;
 
   return (
-    <StationContext.Provider value={{ stations, selectedStationId, selectStation, selectedSummary, loading, refresh }}>
+    <StationContext.Provider value={{ stations, selectedStationId, selectStation, selectedSummary, loading, error, refresh }}>
       {children}
     </StationContext.Provider>
   );

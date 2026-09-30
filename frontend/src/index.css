@@ -380,6 +380,30 @@ body {
   color: var(--text-primary);
 }
 
+.demo-credentials {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--grid-line);
+  border-radius: 4px;
+}
+
+.demo-credentials > strong {
+  color: var(--text-primary);
+}
+
+.demo-account {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+
+.demo-account-role {
+  grid-column: 1 / -1;
+  color: var(--ice);
+  font-weight: 600;
+}
+
 /* ---------- Interactive station digital twin ---------- */
 .station-view-page { max-width: 1480px; }
 .live-indicator { display: flex; align-items: center; gap: 8px; color: var(--ok); font: 11px var(--font-mono); padding: 8px 10px; border: 1px solid #285540; }

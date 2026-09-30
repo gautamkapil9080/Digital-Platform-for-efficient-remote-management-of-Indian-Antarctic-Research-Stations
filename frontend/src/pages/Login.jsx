@@ -61,9 +61,19 @@ export default function Login() {
           {loading ? (isRegistering ? 'Creating account...' : 'Signing in...') : (isRegistering ? 'Create account' : 'Sign in')}
         </button>
 
-        {!isRegistering && <p className="login-hint">
-          Demo accounts: <code>operator / operator123</code> (read+write) or <code>hq / hq123</code> (read-only)
-        </p>}
+        {!isRegistering && <div className="login-hint demo-credentials">
+          <strong>Demo sign-in details</strong>
+          <div className="demo-account">
+            <span className="demo-account-role">Operator</span>
+            <span><b>User ID:</b> <code>operator</code></span>
+            <span><b>Password:</b> <code>operator123</code></span>
+          </div>
+          <div className="demo-account">
+            <span className="demo-account-role">Read-only</span>
+            <span><b>User ID:</b> <code>hq</code></span>
+            <span><b>Password:</b> <code>hq123</code></span>
+          </div>
+        </div>}
         <button className="btn-small" type="button" onClick={() => { setIsRegistering((value) => !value); setError(''); }}>
           {isRegistering ? 'Back to sign in' : 'Create an account'}
         </button>

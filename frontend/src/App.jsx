@@ -1,8 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import Navbar from './components/Navbar';
+
+import BaseLayout from './components/common/BaseLayout';
+
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+
 import Infrastructure from './pages/Infrastructure';
 import Energy from './pages/Energy';
 import Logistics from './pages/Logistics';
@@ -10,10 +13,10 @@ import Environment from './pages/Environment';
 import Alerts from './pages/Alerts';
 import StationView from './pages/StationView';
 
-function Protected({ children }) {
+function ProtectedLayout({ children }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return children;
+  return <BaseLayout>{children}</BaseLayout>;
 }
 
 export default function App() {
@@ -21,28 +24,104 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+
+      {/* =====================================================
+          PUBLIC MAIN LANDING PAGE
+      ===================================================== */}
+
       <Route
-        path="/*"
+        path="/"
+        element={<BaseLayout />}
+      />
+
+
+      {/* =====================================================
+          LOGIN
+      ===================================================== */}
+
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
+
+
+      {/* =====================================================
+          AUTHENTICATED DASHBOARD
+      ===================================================== */}
+
+      <Route
+        path="/dashboard"
         element={
-          <Protected>
-            <div className="app-shell">
-              <Navbar />
-              <main className="app-main">
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/infrastructure" element={<Infrastructure />} />
-                  <Route path="/energy" element={<Energy />} />
-                  <Route path="/logistics" element={<Logistics />} />
-                  <Route path="/environment" element={<Environment />} />
-                  <Route path="/alerts" element={<Alerts />} />
-                  <Route path="/view" element={<StationView />} />
-                </Routes>
-              </main>
-            </div>
-          </Protected>
+          <ProtectedLayout>
+            <Dashboard />
+          </ProtectedLayout>
         }
       />
+
+
+      {/* =====================================================
+          APPLICATION MODULES
+      ===================================================== */}
+
+      <Route
+        path="/infrastructure"
+        element={
+          <ProtectedLayout>
+            <Infrastructure />
+          </ProtectedLayout>
+        }
+      />
+
+
+      <Route
+        path="/energy"
+        element={
+          <ProtectedLayout>
+            <Energy />
+          </ProtectedLayout>
+        }
+      />
+
+
+      <Route
+        path="/logistics"
+        element={
+          <ProtectedLayout>
+            <Logistics />
+          </ProtectedLayout>
+        }
+      />
+
+
+      <Route
+        path="/environment"
+        element={
+          <ProtectedLayout>
+            <Environment />
+          </ProtectedLayout>
+        }
+      />
+
+
+      <Route
+        path="/alerts"
+        element={
+          <ProtectedLayout>
+            <Alerts />
+          </ProtectedLayout>
+        }
+      />
+
+
+      <Route
+        path="/view"
+        element={
+          <ProtectedLayout>
+            <StationView />
+          </ProtectedLayout>
+        }
+      />
+
     </Routes>
   );
 }

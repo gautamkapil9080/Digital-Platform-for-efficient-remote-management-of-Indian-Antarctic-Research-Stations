@@ -23,7 +23,7 @@ export default function Login() {
     try {
       if (isRegistering) await register(name, username, password);
       else await login(username, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || (isRegistering ? 'Registration failed' : 'Login failed'));
     } finally {

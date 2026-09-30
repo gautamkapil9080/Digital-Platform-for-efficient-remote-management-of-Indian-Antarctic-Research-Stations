@@ -3,9 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 const connectDB = require('./config/db');
 const { startSimulator } = require('./utils/simulator');
-const { requireAuth } = require('./middleware/auth');
+const { requireAuth, SECRET } = require('./middleware/auth');
 
 const authRouter = require('./routes/auth');
 const stationsRouter = require('./routes/stations');
@@ -18,9 +19,30 @@ const exportRouter = require('./routes/export');
 
 const app = express();
 const httpServer = http.createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin is not allowed by CORS'));
+  }
+};
+const io = new Server(httpServer, { cors: corsOptions });
 
-app.use(cors());
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('Authentication required'));
+  try {
+    socket.data.user = jwt.verify(token, SECRET);
+    next();
+  } catch (err) {
+    next(new Error('Invalid or expired token'));
+  }
+});
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.set('io', io); // routes reach this with req.app.get('io') to push live updates
 
@@ -60,5 +82,5 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   await connectDB();
   startSimulator(io, Number(process.env.SIMULATOR_INTERVAL_MS) || 10000);
-  httpServer.listen(PORT, () => console.log(`[server] listening on http://localhost:${PORT}`));
+  httpServer.listen(PORT, '0.0.0.0', () => console.log(`[server] listening on port ${PORT}`));
 })();

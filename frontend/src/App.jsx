@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 
 import BaseLayout from './components/common/BaseLayout';
 
@@ -12,7 +13,15 @@ import Environment from './pages/Environment';
 import Alerts from './pages/Alerts';
 import StationView from './pages/StationView';
 
+function ProtectedLayout({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <BaseLayout>{children}</BaseLayout>;
+}
+
 export default function App() {
+  const { user } = useAuth();
+
   return (
     <Routes>
 
@@ -32,7 +41,7 @@ export default function App() {
 
       <Route
         path="/login"
-        element={<Login />}
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
       />
 
 
@@ -43,9 +52,9 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Dashboard />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -57,9 +66,9 @@ export default function App() {
       <Route
         path="/infrastructure"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Infrastructure />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -67,9 +76,9 @@ export default function App() {
       <Route
         path="/energy"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Energy />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -77,9 +86,9 @@ export default function App() {
       <Route
         path="/logistics"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Logistics />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -87,9 +96,9 @@ export default function App() {
       <Route
         path="/environment"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Environment />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -97,9 +106,9 @@ export default function App() {
       <Route
         path="/alerts"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <Alerts />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
@@ -107,9 +116,9 @@ export default function App() {
       <Route
         path="/view"
         element={
-          <BaseLayout>
+          <ProtectedLayout>
             <StationView />
-          </BaseLayout>
+          </ProtectedLayout>
         }
       />
 
